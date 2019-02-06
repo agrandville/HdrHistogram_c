@@ -7,14 +7,14 @@ environment:
   matrix:
   - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
     GENERATOR: Visual Studio 15 2017
-	CFG: Release
-	VSINSTALL: '"Microsoft Visual Studio"/2017/Community/VC/Auxiliary/Build'
-	MSVC_PLATFORM: x86
+    CFG: Release
+    VSINSTALL: '"Microsoft Visual Studio"/2017/Community/VC/Auxiliary/Build'
+    MSVC_PLATFORM: x86
   - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
     GENERATOR: Visual Studio 15 2017
-	CFG: Release
-	VSINSTALL: '"Microsoft Visual Studio"/2017/Community/VC/Auxiliary/Build'
-	MSVC_PLATFORM: amd64
+    CFG: Release
+    VSINSTALL: '"Microsoft Visual Studio"/2017/Community/VC/Auxiliary/Build'
+    MSVC_PLATFORM: amd64
 	 
 install:
   - cd c:\dev
