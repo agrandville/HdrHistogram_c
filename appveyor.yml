@@ -15,7 +15,7 @@ environment:
     CFG: Release
     VSINSTALL: '"Microsoft Visual Studio"/2017/Community/VC/Auxiliary/Build'
     MSVC_PLATFORM: amd64
-	 
+ 
 install:
   - cd c:\dev
   - md c:\dev\zlib64
