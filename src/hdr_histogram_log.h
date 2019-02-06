@@ -35,17 +35,17 @@ extern "C" {
 /**
  * Encode and compress the histogram with gzip.
  */
-int hdr_log_encode(struct hdr_histogram* histogram, char** encoded_histogram);
+int hdr_log_encode(hdr_histogram_t* histogram, char** encoded_histogram);
 
 /**
  * Decode and decompress the histogram with gzip.
  */
-int hdr_log_decode(struct hdr_histogram** histogram, char* base64_histogram, size_t base64_len);
+int hdr_log_decode(hdr_histogram_t** histogram, char* base64_histogram, size_t base64_len);
 
-struct hdr_log_writer
+typedef struct hdr_log_writer
 {
     uint32_t nonce;
-};
+} hdr_log_writer_t;
 
 /**
  * Initialise the log writer.
@@ -53,7 +53,7 @@ struct hdr_log_writer
  * @param writer 'This' pointer
  * @return 0 on success.
  */
-int hdr_log_writer_init(struct hdr_log_writer* writer);
+int hdr_log_writer_init(hdr_log_writer_t* writer);
 
 /**
  * Write the header to the log, this will constist of a user defined string,
@@ -70,7 +70,7 @@ int hdr_log_write_header(
     struct hdr_log_writer* writer,
     FILE* file,
     const char* user_prefix,
-    hdr_timespec* timestamp);
+    hdr_timespec_t* timestamp);
 
 /**
  * Write an hdr_histogram entry to the log.  It will be encoded in a similar
@@ -96,16 +96,16 @@ int hdr_log_write_header(
 int hdr_log_write(
     struct hdr_log_writer* writer,
     FILE* file,
-    const hdr_timespec* start_timestamp,
-    const hdr_timespec* end_timestamp,
+    const hdr_timespec_t* start_timestamp,
+    const hdr_timespec_t* end_timestamp,
     struct hdr_histogram* histogram);
 
-struct hdr_log_reader
+typedef struct hdr_log_reader
 {
     int major_version;
     int minor_version;
-    hdr_timespec start_timestamp;
-};
+    hdr_timespec_t start_timestamp;
+} hdr_log_reader_t;
 
 /**
  * Initialise the log reader.
@@ -113,7 +113,7 @@ struct hdr_log_reader
  * @param reader 'This' pointer
  * @return 0 on success
  */
-int hdr_log_reader_init(struct hdr_log_reader* reader);
+int hdr_log_reader_init(hdr_log_reader_t* reader);
 
 /**
  * Reads the the header information from the log.  Will capure information
@@ -123,7 +123,7 @@ int hdr_log_reader_init(struct hdr_log_reader* reader);
  * @param file The data stream to read from.
  * @return 0 on success.  An error number on failure.
  */
-int hdr_log_read_header(struct hdr_log_reader* reader, FILE* file);
+int hdr_log_read_header(hdr_log_reader_t* reader, FILE* file);
 
 /**
  * Reads an entry from the log filling in the specified histogram, timestamp and
@@ -148,8 +148,8 @@ int hdr_log_read_header(struct hdr_log_reader* reader, FILE* file);
  * the read.  EINVAL in any input values are incorrect.
  */
 int hdr_log_read(
-    struct hdr_log_reader* reader, FILE* file, struct hdr_histogram** histogram,
-    hdr_timespec* timestamp, hdr_timespec* interval);
+    hdr_log_reader_t* reader, FILE* file, hdr_histogram_t** histogram,
+    hdr_timespec_t* timestamp, hdr_timespec_t* interval);
 
 /**
  * Returns a string representation of the error number.

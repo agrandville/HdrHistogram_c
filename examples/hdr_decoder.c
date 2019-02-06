@@ -25,7 +25,7 @@ int main(int argc, char** argv)
     FILE* f;
     struct hdr_log_reader reader;
     struct hdr_histogram* h = NULL;
-    hdr_timespec timestamp, interval;
+    hdr_timespec_t timestamp, interval;
 
     if (argc == 1)
     {

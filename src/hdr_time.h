@@ -16,11 +16,11 @@ typedef struct hdr_timespec
 {
     long tv_sec;
     long tv_nsec;
-} hdr_timespec;
+} hdr_timespec_t;
 
 #else
 
-typedef struct timespec hdr_timespec;
+typedef struct timespec hdr_timespec_t;
 
 #endif
 
@@ -29,17 +29,17 @@ extern "C" {
 #endif
 
 #if defined(_MSC_VER)
-void hdr_gettime(hdr_timespec* t);
+void hdr_gettime(hdr_timespec_t* t);
 #else
-void hdr_gettime(hdr_timespec* t);
+void hdr_gettime(hdr_timespec_t* t);
 #endif
 
-void hdr_getnow(hdr_timespec* t);
+void hdr_getnow(hdr_timespec_t* t);
 
-double hdr_timespec_as_double(const hdr_timespec* t);
+double hdr_timespec_as_double(const hdr_timespec_t* t);
 
 /* Assumes only millisecond accuracy. */
-void hdr_timespec_from_double(hdr_timespec* t, double value);
+void hdr_timespec_from_double(hdr_timespec_t* t, double value);
 
 #ifdef __cplusplus
 }

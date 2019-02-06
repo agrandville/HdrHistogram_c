@@ -32,11 +32,11 @@
 #include <hdr_interval_recorder.h>
 #include <hdr_time.h>
 
-static int64_t diff(struct hdr_timespec t0, struct hdr_timespec t1)
+static int64_t diff(hdr_timespec_t* t0, hdr_timespec_t* t1)
 {
     int64_t delta_us = 0;
-    delta_us = (t1.tv_sec - t0.tv_sec) * 1000000;
-    delta_us += (t1.tv_nsec - t0.tv_nsec) / 1000;
+    delta_us = (t1->tv_sec - t0->tv_sec) * 1000000;
+    delta_us += (t1->tv_nsec - t0->tv_nsec) / 1000;
 
     return delta_us;
 }
@@ -47,28 +47,31 @@ DWORD WINAPI record_hiccups(LPVOID thread_context)
 static void* record_hiccups(void* thread_context)
 #endif
 {
+
+        hdr_timespec_t t0;
+        hdr_timespec_t t1;
+        hdr_interval_recorder_t* r;
+
 #ifdef _WINDOWS_
 	HANDLE hTimer = NULL;
 	LARGE_INTEGER liDueTime;
 #else
+	struct itimerspec timeout;
 	struct pollfd fd;
 	memset(&fd, 0, sizeof(struct pollfd));
 #endif
 	
-	struct hdr_timespec t0;
-	struct hdr_timespec t1;
-    struct hdr_interval_recorder* r = thread_context;
+	r = thread_context;
 
     
-    memset(&t0, 0, sizeof(struct hdr_timespec));
-    memset(&t1, 0, sizeof(struct hdr_timespec));
+    memset(&t0, 0, sizeof(hdr_timespec_t));
+    memset(&t1, 0, sizeof(hdr_timespec_t));
 
 #ifdef _WINDOWS_
 	liDueTime.QuadPart = -1000000LL;
 	hTimer = CreateWaitableTimer(NULL, TRUE, NULL);
 #else
-	struct itimerspec timeout; 
-	memset(&timeout, 0, sizeof(struct itimerspec));
+	memset(&timeout, 0, sizeof(hdr_timespec_t));
 	fd.fd = timerfd_create(CLOCK_MONOTONIC, TFD_NONBLOCK | TFD_CLOEXEC);
     fd.events = POLLIN|POLLPRI|POLLRDHUP;
     fd.revents = 0;
@@ -98,7 +101,7 @@ static void* record_hiccups(void* thread_context)
         hdr_gettime(&t1);
 #endif
 
-        delta_us = diff(t0, t1) - 1000;
+        delta_us = diff(&t0, &t1) - 1000;
         delta_us = delta_us < 0 ? 0 : delta_us;
 
         hdr_interval_recorder_record_value(r, delta_us);
@@ -112,18 +115,18 @@ static void* record_hiccups(void* thread_context)
 #endif
 }
 
-struct config_t
+typedef struct config
 {
     int interval;
     const char* filename;
-};
+} config_t;
 
 const char* USAGE =
 "hiccup [-i <interval>] [-f <filename>]\n"
 "  interval: <number> Time in seconds between samples (default 1).\n"
 "  filename: <string> Name of the file to log to (default stdout).\n";
 
-static int handle_opts(int argc, char** argv, struct config_t* config)
+static int handle_opts(int argc, char** argv, config_t* config)
 {
     int c;
     int interval = 1;
@@ -157,13 +160,13 @@ static int handle_opts(int argc, char** argv, struct config_t* config)
 
 int main(int argc, char** argv)
 {
-    struct hdr_timespec timestamp;
-    struct hdr_timespec start_timestamp;
-    struct hdr_timespec end_timestamp;
-    struct hdr_interval_recorder recorder;
-    struct hdr_log_writer log_writer;
-    struct config_t config;
-    struct hdr_histogram* inactive = NULL;
+    hdr_timespec_t timestamp;
+    hdr_timespec_t start_timestamp;
+    hdr_timespec_t end_timestamp;
+    hdr_interval_recorder_t recorder;
+    hdr_log_writer_t log_writer;
+    config_t config;
+    hdr_histogram_t* inactive = NULL;
 #ifdef _WINDOWS_
 	HANDLE recording_thread;
 #else
@@ -172,7 +175,7 @@ int main(int argc, char** argv)
 	
 	FILE* output = stdout;
 
-    memset(&config, 0, sizeof(struct config_t));
+    memset(&config, 0, sizeof(config_t));
     if (!handle_opts(argc, argv, &config))
     {
         printf("%s", USAGE);

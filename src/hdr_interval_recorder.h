@@ -11,12 +11,12 @@
 #include "hdr_histogram.h"
 
 HDR_ALIGN_PREFIX(8)
-struct hdr_interval_recorder
+typedef struct hdr_interval_recorder
 {
     struct hdr_histogram* active;
     struct hdr_histogram* inactive;
     struct hdr_writer_reader_phaser phaser;
-} 
+} hdr_interval_recorder_t;
 HDR_ALIGN_SUFFIX(8);
 
 #ifdef __cplusplus

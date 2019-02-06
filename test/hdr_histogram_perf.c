@@ -25,18 +25,18 @@
 #endif
 
 
-static hdr_timespec diff(hdr_timespec start, hdr_timespec end)
+static hdr_timespec_t diff(hdr_timespec_t* start, hdr_timespec_t* end)
 {
-    hdr_timespec temp;
-    if ((end.tv_nsec-start.tv_nsec) < 0)
+    hdr_timespec_t temp;
+    if ((end->tv_nsec-start->tv_nsec) < 0)
     {
-        temp.tv_sec = end.tv_sec - start.tv_sec - 1;
-        temp.tv_nsec = 1000000000 + end.tv_nsec-start.tv_nsec;
+        temp.tv_sec = end->tv_sec - start->tv_sec - 1;
+        temp.tv_nsec = 1000000000 + end->tv_nsec-start->tv_nsec;
     }
     else
     {
-        temp.tv_sec = end.tv_sec - start.tv_sec;
-        temp.tv_nsec = end.tv_nsec - start.tv_nsec;
+        temp.tv_sec = end->tv_sec - start->tv_sec;
+        temp.tv_nsec = end->tv_nsec - start->tv_nsec;
     }
     return temp;
 }
@@ -65,7 +65,7 @@ static char *format_double(double d)
 int main()
 {
     struct hdr_histogram* histogram;
-    hdr_timespec t0, t1;
+    hdr_timespec_t t0, t1;
     int result, i;
     int64_t iterations;
     int64_t max_value = INT64_C(24) * 60 * 60 * 1000000;
@@ -83,7 +83,7 @@ int main()
     for (i = 0; i < 100; i++)
     {
         int64_t j;
-        hdr_timespec taken;
+        hdr_timespec_t taken;
         double time_taken, ops_sec;
 
         hdr_gettime(&t0);
@@ -93,7 +93,7 @@ int main()
         }
         hdr_gettime(&t1);
 
-        taken = diff(t0, t1);
+        taken = diff(&t0, &t1);
         time_taken = taken.tv_sec + taken.tv_nsec / 1000000000.0;
         ops_sec = (iterations - 1) / time_taken;
 

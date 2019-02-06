@@ -43,7 +43,7 @@ static long ns_to_ms(long ns)
     return (ns / 1000000) * 1000000;
 }
 
-static bool compare_timespec(hdr_timespec* a, hdr_timespec* b)
+static bool compare_timespec(hdr_timespec_t* a, hdr_timespec_t* b)
 {
     char a_str[128];
     char b_str[128];
@@ -306,21 +306,20 @@ static char* test_encode_and_decode_base64()
 
 static char* test_encode_and_decode_empty()
 {
-    free(raw_histogram);
-
-    mu_assert("allocation should be valid", 0 == hdr_init(1, 1000000, 1, &raw_histogram));
-
     uint8_t* buffer = NULL;
     uint8_t* decoded = NULL;
     char* encoded = NULL;
     size_t len = 0;
     int rc = 0;
+    size_t encoded_len, decoded_len;
+    free(raw_histogram);
 
+    mu_assert("allocation should be valid", 0 == hdr_init(1, 1000000, 1, &raw_histogram));
     rc = hdr_encode_compressed(raw_histogram, &buffer, &len);
     mu_assert("Did not encode", validate_return_code(rc));
 
-    size_t encoded_len = hdr_base64_encoded_len(len);
-    size_t decoded_len = hdr_base64_decoded_len(encoded_len);
+    encoded_len = hdr_base64_encoded_len(len);
+    decoded_len = hdr_base64_decoded_len(encoded_len);
     encoded = calloc(encoded_len + 1, sizeof(char));
     decoded = calloc(decoded_len, sizeof(uint8_t));
 
@@ -498,11 +497,11 @@ static char* writes_and_reads_log()
     struct hdr_histogram* read_cor_histogram;
     struct hdr_histogram* read_raw_histogram;
     const char* file_name = "histogram.log";
-    hdr_timespec timestamp;
-    hdr_timespec interval;
+    hdr_timespec_t timestamp;
+    hdr_timespec_t interval;
     int rc = 0;
     FILE* log_file;
-    hdr_timespec actual_timestamp, actual_interval;
+    hdr_timespec_t actual_timestamp, actual_interval;
 
     hdr_gettime(&timestamp);
 
@@ -572,8 +571,8 @@ static char* writes_and_reads_log()
 static char* log_reader_aggregates_into_single_histogram()
 {
     const char* file_name = "histogram.log";
-    hdr_timespec timestamp;
-    hdr_timespec interval;
+    hdr_timespec_t timestamp;
+    hdr_timespec_t interval;
     struct hdr_log_writer writer;
     struct hdr_log_reader reader;
     int rc = 0;
@@ -731,7 +730,7 @@ static char* decode_v1_log()
     struct hdr_histogram* accum;
     struct hdr_histogram* h = NULL;
     struct hdr_log_reader reader;
-    hdr_timespec timestamp, interval;
+    hdr_timespec_t timestamp, interval;
     int rc;
     int64_t total_count = 0;
     int histogram_count = 0;
@@ -777,7 +776,7 @@ static char* decode_v2_log()
     struct hdr_histogram* accum;
     struct hdr_histogram* h = NULL;
     struct hdr_log_reader reader;
-    hdr_timespec timestamp, interval;
+    hdr_timespec_t timestamp, interval;
     int histogram_count = 0;
     int64_t total_count = 0;
     int rc;
@@ -823,8 +822,8 @@ static char* decode_v3_log()
     struct hdr_histogram* accum;
     struct hdr_histogram* h = NULL;
     struct hdr_log_reader reader;
-    hdr_timespec timestamp;
-    hdr_timespec interval;
+    hdr_timespec_t timestamp;
+    hdr_timespec_t interval;
     int rc;
     int histogram_count = 0;
     int64_t total_count = 0;
@@ -870,8 +869,8 @@ static char* decode_v0_log()
     const char* v1_log = "jHiccup-2.0.1.logV0.hlog";
     struct hdr_histogram* h = NULL;
     struct hdr_log_reader reader;
-    hdr_timespec timestamp;
-    hdr_timespec interval;
+    hdr_timespec_t timestamp;
+    hdr_timespec_t interval;
     int rc;
     int histogram_count = 0;
     int64_t total_count = 0;

@@ -767,7 +767,7 @@ static int print_version(FILE* f, const char* version)
     return fprintf(f, "#[Histogram log format version %s]\n", version);
 }
 
-static int print_time(FILE* f, hdr_timespec* timestamp)
+static int print_time(FILE* f, hdr_timespec_t* timestamp)
 {
     char time_str[128];
     struct tm date_time;
@@ -802,7 +802,7 @@ static int print_header(FILE* f)
 /* "StartTimestamp","EndTimestamp","Interval_Max","Interval_Compressed_Histogram"    */
 int hdr_log_write_header(
     struct hdr_log_writer* writer, FILE* file,
-    const char* user_prefix, hdr_timespec* timestamp)
+    const char* user_prefix, hdr_timespec_t* timestamp)
 {
     (void)writer;
 
@@ -829,8 +829,8 @@ int hdr_log_write_header(
 int hdr_log_write(
     struct hdr_log_writer* writer,
     FILE* file,
-    const hdr_timespec* start_timestamp,
-    const hdr_timespec* end_timestamp,
+    const hdr_timespec_t* start_timestamp,
+    const hdr_timespec_t* end_timestamp,
     struct hdr_histogram* histogram)
 {
     uint8_t* compressed_histogram = NULL;
@@ -971,7 +971,7 @@ int hdr_log_read_header(struct hdr_log_reader* reader, FILE* file)
     return 0;
 }
 
-static void update_timespec(hdr_timespec* ts, double timestamp)
+static void update_timespec(hdr_timespec_t* ts, double timestamp)
 {
     if (NULL == ts)
     {
@@ -1055,7 +1055,7 @@ static ssize_t hdr_getline(char** lineptr, FILE* stream)
 
 int hdr_log_read(
     struct hdr_log_reader* reader, FILE* file, struct hdr_histogram** histogram,
-    hdr_timespec* timestamp, hdr_timespec* interval)
+    hdr_timespec_t* timestamp, hdr_timespec_t* interval)
 {
     const char* format_v12 = "%lf,%lf,%d.%d,%s";
     const char* format_v13 = "Tag=%*[^,],%lf,%lf,%d.%d,%s";

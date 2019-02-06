@@ -17,7 +17,7 @@
 static int s_clockPeriodSet = 0;
 static double s_clockPeriod = 1.0;
 
-void hdr_gettime(hdr_timespec* t)
+void hdr_gettime(hdr_timespec_t* t)
 {
     LARGE_INTEGER num;
     /* if this is distasteful, we can add in an hdr_time_init() */
@@ -37,7 +37,7 @@ void hdr_gettime(hdr_timespec* t)
     t->tv_nsec = (long) (remainder * 1000000000);
 }
 
-void hdr_getnow(hdr_timespec* t)
+void hdr_getnow(hdr_timespec_t* t)
 {
 	FILETIME ft;
 	GetSystemTimeAsFileTime(&ft);
@@ -67,7 +67,7 @@ void hdr_getnow(hdr_timespec* t)
 #include <mach/mach.h>
 
 
-void hdr_gettime(hdr_timespec* ts)
+void hdr_gettime(hdr_timespec_t* ts)
 {
     clock_serv_t cclock;
     mach_timespec_t mts;
@@ -79,7 +79,7 @@ void hdr_gettime(hdr_timespec* ts)
 }
 
 
-void hdr_getnow(hdr_timespec* ts)
+void hdr_getnow(hdr_timespec_t* ts)
 {
     hdr_gettime(ts);
 }
@@ -87,12 +87,12 @@ void hdr_getnow(hdr_timespec* ts)
 #elif defined(__linux__) || defined(__CYGWIN__)
 
 
-void hdr_gettime(hdr_timespec* t)
+void hdr_gettime(hdr_timespec_t* t)
 {
     clock_gettime(CLOCK_MONOTONIC, (struct timespec*)t);
 }
 
-void hdr_getnow(hdr_timespec* t)
+void hdr_getnow(hdr_timespec_t* t)
 {
     clock_gettime(CLOCK_REALTIME, (struct timespec*)t);
 }
@@ -103,13 +103,13 @@ void hdr_getnow(hdr_timespec* t)
 
 #endif
 
-double hdr_timespec_as_double(const hdr_timespec* t)
+double hdr_timespec_as_double(const hdr_timespec_t* t)
 {
     double d = t->tv_sec;
     return d + (t->tv_nsec / 1000000000.0);
 }
 
-void hdr_timespec_from_double(hdr_timespec* t, double value)
+void hdr_timespec_from_double(hdr_timespec_t* t, double value)
 {
     int seconds = (int) value;
     int milliseconds = (int) round((value - seconds) * 1000);
