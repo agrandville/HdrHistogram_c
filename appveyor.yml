@@ -2,6 +2,13 @@ version: 0.9.7.{build}
 
 clone_folder: c:\dev\HdrHistogram_c
 
+configuration:
+  - Debug
+  - Release
+
+platform:
+  - Any CPU  
+
 install:
   - cd c:\dev
   - md c:\dev\zlib64
@@ -25,4 +32,5 @@ build_script:
   - cmake --build .
 
 test_script:
-#  - cmd: ctest
+  - cd c:\dev\HdrHistogram_c
+  - cmd: ctest

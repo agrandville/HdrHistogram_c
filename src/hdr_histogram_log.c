@@ -778,7 +778,7 @@ static int print_time(FILE* f, hdr_timespec* timestamp)
     }
 
 #if defined(__WINDOWS__)
-    _gmtime32_s(&date_time, &timestamp->tv_sec);
+	_localtime32_s(&date_time, &timestamp->tv_sec);
 #else
     gmtime_r(&timestamp->tv_sec, &date_time);
 #endif

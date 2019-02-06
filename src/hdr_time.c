@@ -37,6 +37,30 @@ void hdr_gettime(hdr_timespec* t)
     t->tv_nsec = (long) (remainder * 1000000000);
 }
 
+void hdr_getnow(hdr_timespec* t)
+{
+	FILETIME ft;
+	GetSystemTimeAsFileTime(&ft);
+
+	// takes the last modified date
+	LARGE_INTEGER date, adjust;
+	date.HighPart = ft.dwHighDateTime;
+	date.LowPart = ft.dwLowDateTime;
+
+	// 100-nanoseconds * 10000 = milliseconds
+	adjust.QuadPart = 11644473600000 * 10000;
+
+	// removes the diff between 1970 and 1601
+	date.QuadPart -= adjust.QuadPart;
+
+	// converts back from 100-nanoseconds to seconds
+	double integral;
+	double seconds = date.QuadPart / 10000000.0;
+	double remainder = modf(seconds, &integral);
+	t->tv_sec = (long)integral;
+	t->tv_nsec = (long)(remainder * 1000000000);
+}
+
 #elif defined(__APPLE__)
 
 #include <mach/clock.h>

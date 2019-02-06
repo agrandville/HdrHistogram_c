@@ -12,8 +12,19 @@ endif (RT_EXISTS)
 
 install(TARGETS hdr_decoder DESTINATION bin)
 
-if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-    add_executable(hiccup hiccup.c)
+
+add_executable(hiccup hiccup.c)
+if (WIN32)
+    target_sources(hiccup PUBLIC "win/getopt.c")
+	target_link_libraries(hiccup hdr_histogram_static ${ZLIB_LIBRARY})
+	target_include_directories(hiccup SYSTEM PUBLIC "win")
+else()
     target_link_libraries(hiccup hdr_histogram m z pthread rt)
-    install(TARGETS hiccup DESTINATION bin)
-endif(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+	install(TARGETS hiccup DESTINATION bin)
+endif()
+
+#if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+#    add_executable(hiccup hiccup.c)
+#    target_link_libraries(hiccup hdr_histogram m z pthread rt)
+#    install(TARGETS hiccup DESTINATION bin)
+#endif(${CMAKE_SYSTEM_NAME} MATCHES "Linux")

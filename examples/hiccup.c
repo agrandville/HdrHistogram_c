@@ -4,25 +4,35 @@
  * as explained at http://creativecommons.org/publicdomain/zero/1.0/
  */
 
-#include <stdint.h>
-#include <stdbool.h>
-#include <stdio.h>
+#ifdef WIN32
+#include <WinSock2.h>
+#include <windows.h>
+#include <sys/types.h>
+#include "getopt.h"
+#include "time.h"
+#pragma warning(disable:4996)
+#else
 #include <pthread.h>
 #include <sys/timerfd.h>
 #include <poll.h>
+#include <unistd.h>
+#endif
+ 
+#include <stdint.h>
+#include <stdbool.h>
+#include <stdio.h>
 #include <string.h>
 #include <signal.h>
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
 
 #include <hdr_histogram.h>
 #include <hdr_histogram_log.h>
 #include <hdr_interval_recorder.h>
 #include <hdr_time.h>
 
-static int64_t diff(struct timespec t0, struct timespec t1)
+static int64_t diff(struct hdr_timespec t0, struct hdr_timespec t1)
 {
     int64_t delta_us = 0;
     delta_us = (t1.tv_sec - t0.tv_sec) * 1000000;
@@ -31,45 +41,75 @@ static int64_t diff(struct timespec t0, struct timespec t1)
     return delta_us;
 }
 
+#ifdef _WINDOWS_
+DWORD WINAPI record_hiccups(LPVOID thread_context)
+#else
 static void* record_hiccups(void* thread_context)
+#endif
 {
-    struct pollfd fd;
-    struct timespec t0;
-    struct timespec t1;
-    struct itimerspec timeout; 
+#ifdef _WINDOWS_
+	HANDLE hTimer = NULL;
+	LARGE_INTEGER liDueTime;
+#else
+	struct pollfd fd;
+	memset(&fd, 0, sizeof(struct pollfd));
+#endif
+	
+	struct hdr_timespec t0;
+	struct hdr_timespec t1;
     struct hdr_interval_recorder* r = thread_context;
 
-    memset(&fd, 0, sizeof(struct pollfd));
-    memset(&timeout, 0, sizeof(struct itimerspec));
-    memset(&t0, 0, sizeof(struct timespec));
-    memset(&t1, 0, sizeof(struct timespec));
+    
+    memset(&t0, 0, sizeof(struct hdr_timespec));
+    memset(&t1, 0, sizeof(struct hdr_timespec));
 
-    fd.fd = timerfd_create(CLOCK_MONOTONIC, TFD_NONBLOCK | TFD_CLOEXEC);
+#ifdef _WINDOWS_
+	liDueTime.QuadPart = -1000000LL;
+	hTimer = CreateWaitableTimer(NULL, TRUE, NULL);
+#else
+	struct itimerspec timeout; 
+	memset(&timeout, 0, sizeof(struct itimerspec));
+	fd.fd = timerfd_create(CLOCK_MONOTONIC, TFD_NONBLOCK | TFD_CLOEXEC);
     fd.events = POLLIN|POLLPRI|POLLRDHUP;
     fd.revents = 0;
+	timeout.it_value.tv_sec = 0;
+	timeout.it_value.tv_nsec = 1000000;
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wmissing-noreturn"
+
+#endif
+
     while (true)
     {
         int64_t delta_us;
 
-        timeout.it_value.tv_sec = 0;
-        timeout.it_value.tv_nsec = 1000000;
+#ifdef _WINDOWS_
+		SetWaitableTimer(hTimer, &liDueTime, 0, NULL, NULL, 0);
+
+		hdr_gettime(&t0);
+		WaitForSingleObject(hTimer, INFINITE);
+		hdr_gettime(&t1);
+#else
         timerfd_settime(fd.fd, 0, &timeout, NULL);
 
         hdr_gettime(&t0);
         poll(&fd, 1, -1);
         hdr_gettime(&t1);
+#endif
 
         delta_us = diff(t0, t1) - 1000;
         delta_us = delta_us < 0 ? 0 : delta_us;
 
         hdr_interval_recorder_record_value(r, delta_us);
     }
-#pragma clang diagnostic pop
 
-    pthread_exit(NULL);
+#ifdef _WINDOWS_
+	return 0;
+#else
+#pragma clang diagnostic pop
+	pthread_exit(NULL);
+#endif
 }
 
 struct config_t
@@ -117,15 +157,20 @@ static int handle_opts(int argc, char** argv, struct config_t* config)
 
 int main(int argc, char** argv)
 {
-    struct timespec timestamp;
-    struct timespec start_timestamp;
-    struct timespec end_timestamp;
+    struct hdr_timespec timestamp;
+    struct hdr_timespec start_timestamp;
+    struct hdr_timespec end_timestamp;
     struct hdr_interval_recorder recorder;
     struct hdr_log_writer log_writer;
     struct config_t config;
     struct hdr_histogram* inactive = NULL;
-    pthread_t recording_thread;
-    FILE* output = stdout;
+#ifdef _WINDOWS_
+	HANDLE recording_thread;
+#else
+	pthread_t recording_thread;
+#endif
+	
+	FILE* output = stdout;
 
     memset(&config, 0, sizeof(struct config_t));
     if (!handle_opts(argc, argv, &config))
@@ -153,23 +198,37 @@ int main(int argc, char** argv)
         return -1;
     }
 
-    if (pthread_create(&recording_thread, NULL, record_hiccups, &recorder))
+#ifdef _WINDOWS_
+	recording_thread = CreateThread(
+		NULL,			// default security attributes
+		0,				// use default stack size  
+		record_hiccups,	// thread function name
+		&recorder,		// argument to thread function 
+		0,				// use default creation flags 
+		NULL);			// returns the thread identifier 
+
+#else
+	if (pthread_create(&recording_thread, NULL, record_hiccups, &recorder))
     {
         fprintf(stderr, "%s\n", "Failed to create thread");
         return -1;
     }
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wmissing-noreturn"
 
+#endif
     hdr_gettime(&start_timestamp);
     hdr_getnow(&timestamp);
     hdr_log_writer_init(&log_writer);
     hdr_log_write_header(&log_writer, output, "foobar", &timestamp);
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wmissing-noreturn"
     while (true)
     {        
-        sleep(config.interval);
-
+#ifdef _WINDOWS_
+		Sleep(config.interval*1000);
+#else
+		sleep(config.interval);
+#endif
         inactive = hdr_interval_recorder_sample(&recorder);
 
         hdr_gettime(&end_timestamp);
@@ -182,7 +241,11 @@ int main(int argc, char** argv)
 
         hdr_reset(inactive);
     }
-#pragma clang diagnostic pop
 
-    pthread_exit(NULL);
+#ifdef _WINDOWS_
+	return 0;
+#else
+#pragma clang diagnostic pop
+	pthread_exit(NULL);
+#endif
 }
