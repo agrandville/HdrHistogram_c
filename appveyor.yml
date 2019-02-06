@@ -2,13 +2,6 @@ version: 0.9.7.{build}
 
 clone_folder: c:\dev\HdrHistogram_c
 
-configuration:
-  - Debug
-  - Release
-
-platform:
-  - Any CPU  
-
 install:
   - cd c:\dev
   - md c:\dev\zlib64
@@ -20,17 +13,30 @@ build:
 
 build_script:
   - cd c:\dev\zlib-1.2.11
-  - md build
-  - cd build
-  - cmake -DCMAKE_INSTALL_PREFIX=c:\dev\zlib64 -G"Visual Studio 12 2013 Win64" ..
-  - cmake --build . --target install
+  - md build64
+  - cd build64
+  - cmake -DCMAKE_INSTALL_PREFIX=c:\dev\zlib64 -G"VisualStudio 15 2017 Win64" ..
+  - cmake --build . --target install --config "Release"
   - dir c:\dev\zlib64
+  - cd c:\dev\zlib-1.2.11
+  - md build32
+  - cd build32
+  - cmake -DCMAKE_INSTALL_PREFIX=c:\dev\zlib32 -G"VisualStudio 15 2017" ..
+  - cmake --build . --target install --config "Release"
+  - dir c:\dev\zlib32
   - cd c:\dev\HdrHistogram_c
-  - md build
-  - cd build
-  - cmake -DCMAKE_PREFIX_PATH="c:\dev\zlib64" -G"Visual Studio 12 2013 Win64" ..
-  - cmake --build .
+  - md build64
+  - cd build64
+  - cmake -DZLIB_LIBRARY="C:\DEV\zlib64\lib\zlibstatic.lib" -DZLIB_INCLUDE_DIR="C:\DEV\zlib64\include" -G"Visual Studio 15 2017 Win64" ..
+  - cmake --build . --config "Release"
+  - cd c:\dev\HdrHistogram_c
+  - md build32
+  - cd build32
+  - cmake -DZLIB_LIBRARY="C:\DEV\zlib32\lib\zlibstatic.lib" -DZLIB_INCLUDE_DIR="C:\DEV\zlib32\include" -G"Visual Studio 15 2017" ..
+  - cmake --build . --config "Release"
 
 test_script:
-  - cd c:\dev\HdrHistogram_c
+  - cd c:\dev\HdrHistogram_c\build64
+  - cmd: ctest
+  - cd c:\dev\HdrHistogram_c\build32
   - cmd: ctest
