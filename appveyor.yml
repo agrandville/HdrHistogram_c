@@ -15,13 +15,13 @@ build_script:
   - cd c:\dev\zlib-1.2.11
   - md build64
   - cd build64
-  - cmake -DCMAKE_INSTALL_PREFIX=c:\dev\zlib64 -G"VisualStudio 15 2017 Win64" ..
+  - cmake -DCMAKE_INSTALL_PREFIX=c:\dev\zlib64 -G"Visual Studio 15 2017 Win64" ..
   - cmake --build . --target install --config "Release"
   - dir c:\dev\zlib64
   - cd c:\dev\zlib-1.2.11
   - md build32
   - cd build32
-  - cmake -DCMAKE_INSTALL_PREFIX=c:\dev\zlib32 -G"VisualStudio 15 2017" ..
+  - cmake -DCMAKE_INSTALL_PREFIX=c:\dev\zlib32 -G"Visual Studio 15 2017" ..
   - cmake --build . --target install --config "Release"
   - dir c:\dev\zlib32
   - cd c:\dev\HdrHistogram_c
