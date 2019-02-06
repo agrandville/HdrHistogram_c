@@ -2,6 +2,20 @@ version: 0.9.7.{build}
 
 clone_folder: c:\dev\HdrHistogram_c
 
+
+environment:
+  matrix:
+  - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+    GENERATOR: Visual Studio 15 2017
+	CFG: Release
+	VSINSTALL: '"Microsoft Visual Studio"/2017/Community/VC/Auxiliary/Build'
+	MSVC_PLATFORM: x86
+  - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+    GENERATOR: Visual Studio 15 2017
+	CFG: Release
+	VSINSTALL: '"Microsoft Visual Studio"/2017/Community/VC/Auxiliary/Build'
+	MSVC_PLATFORM: amd64
+	 
 install:
   - cd c:\dev
   - md c:\dev\zlib64
@@ -13,30 +27,17 @@ build:
 
 build_script:
   - cd c:\dev\zlib-1.2.11
-  - md build64
-  - cd build64
-  - cmake -DCMAKE_INSTALL_PREFIX=c:\dev\zlib64 -G"Visual Studio 15 2017 Win64" ..
-  - cmake --build . --target install --config "Release"
-  - dir c:\dev\zlib64
-  - cd c:\dev\zlib-1.2.11
-  - md build32
-  - cd build32
-  - cmake -DCMAKE_INSTALL_PREFIX=c:\dev\zlib32 -G"Visual Studio 15 2017" ..
-  - cmake --build . --target install --config "Release"
-  - dir c:\dev\zlib32
+  - md build%MSVC_PLATFORM%
+  - cd build%MSVC_PLATFORM%
+  - cmake -DCMAKE_INSTALL_PREFIX=c:\dev\zlib%MSVC_PLATFORM% -G "%GENERATOR%" -DCMAKE_BUILD_TYPE=%CFG% ..
+  - cmake --build . --target install --config "%CFG%"
+  - dir c:\dev\zlib%MSVC_PLATFORM%
   - cd c:\dev\HdrHistogram_c
-  - md build64
-  - cd build64
-  - cmake -DZLIB_LIBRARY="C:\DEV\zlib64\lib\zlibstatic.lib" -DZLIB_INCLUDE_DIR="C:\DEV\zlib64\include" -G"Visual Studio 15 2017 Win64" ..
-  - cmake --build . --config "Release"
-  - cd c:\dev\HdrHistogram_c
-  - md build32
-  - cd build32
-  - cmake -DZLIB_LIBRARY="C:\DEV\zlib32\lib\zlibstatic.lib" -DZLIB_INCLUDE_DIR="C:\DEV\zlib32\include" -G"Visual Studio 15 2017" ..
-  - cmake --build . --config "Release"
+  - md build%MSVC_PLATFORM%
+  - cd build%MSVC_PLATFORM%
+  - cmake -DZLIB_LIBRARY="C:\DEV\zlib%MSVC_PLATFORM%\lib\zlibstatic.lib" -DZLIB_INCLUDE_DIR="C:\DEV\zlib%MSVC_PLATFORM%\include" -G "%GENERATOR%" ..
+  - cmake --build . --config "%CFG%"
 
 test_script:
-  - cd c:\dev\HdrHistogram_c\build64
-  - cmd: ctest
-  - cd c:\dev\HdrHistogram_c\build32
+  - cd c:\dev\HdrHistogram_c\build%MSVC_PLATFORM%
   - cmd: ctest
