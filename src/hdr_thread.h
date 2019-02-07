@@ -18,7 +18,7 @@
 typedef struct hdr_mutex
 {
     uint8_t _critical_section[40];
-} hdr_mutex;
+} hdr_mutex_t;
 
 #else
 
@@ -30,21 +30,21 @@ typedef struct hdr_mutex
 typedef struct hdr_mutex
 {
     pthread_mutex_t _mutex;
-} hdr_mutex;
+} hdr_mutex_t;
 #endif
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-struct hdr_mutex* hdr_mutex_alloc(void);
-void hdr_mutex_free(struct hdr_mutex*);
+hdr_mutex_t* hdr_mutex_alloc(void);
+void hdr_mutex_free(hdr_mutex_t*);
 
-int hdr_mutex_init(struct hdr_mutex* mutex);
-void hdr_mutex_destroy(struct hdr_mutex* mutex);
+int hdr_mutex_init(hdr_mutex_t* mutex);
+void hdr_mutex_destroy(hdr_mutex_t* mutex);
 
-void hdr_mutex_lock(struct hdr_mutex* mutex);
-void hdr_mutex_unlock(struct hdr_mutex* mutex);
+void hdr_mutex_lock(hdr_mutex_t* mutex);
+void hdr_mutex_unlock(hdr_mutex_t* mutex);
 
 void hdr_yield(void);
 int hdr_usleep(unsigned int useconds);

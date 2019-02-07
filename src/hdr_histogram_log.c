@@ -35,7 +35,7 @@ typedef SSIZE_T ssize_t;
 #include "hdr_endian.h"
 
 /* Private prototypes useful for the logger */
-int32_t counts_index_for(const struct hdr_histogram* h, int64_t value);
+int32_t counts_index_for(const hdr_histogram_t* h, int64_t value);
 
 
 #define FAIL_AND_CLEANUP(label, error_name, error) \
@@ -219,7 +219,7 @@ typedef struct /*__attribute__((__packed__))*/
 #define SIZEOF_COMPRESSION_FLYWEIGHT (sizeof(_compression_flyweight) - sizeof(uint8_t))
 
 int hdr_encode_compressed(
-    struct hdr_histogram* h,
+    hdr_histogram_t* h,
     uint8_t** compressed_histogram,
     size_t* compressed_len)
 {
@@ -315,7 +315,7 @@ int hdr_encode_compressed(
 /* ##     ## ##       ##    ## ##     ## ##     ##  ##  ##   ### ##    ##  */
 /* ########  ########  ######   #######  ########  #### ##    ##  ######   */
 
-static void _apply_to_counts_16(struct hdr_histogram* h, const int16_t* counts_data, const int32_t counts_limit)
+static void _apply_to_counts_16(hdr_histogram_t* h, const int16_t* counts_data, const int32_t counts_limit)
 {
     int i;
     for (i = 0; i < counts_limit; i++)
@@ -324,7 +324,7 @@ static void _apply_to_counts_16(struct hdr_histogram* h, const int16_t* counts_d
     }
 }
 
-static void _apply_to_counts_32(struct hdr_histogram* h, const int32_t* counts_data, const int32_t counts_limit)
+static void _apply_to_counts_32(hdr_histogram_t* h, const int32_t* counts_data, const int32_t counts_limit)
 {
     int i;
     for (i = 0; i < counts_limit; i++)
@@ -333,7 +333,7 @@ static void _apply_to_counts_32(struct hdr_histogram* h, const int32_t* counts_d
     }
 }
 
-static void _apply_to_counts_64(struct hdr_histogram* h, const int64_t* counts_data, const int32_t counts_limit)
+static void _apply_to_counts_64(hdr_histogram_t* h, const int64_t* counts_data, const int32_t counts_limit)
 {
     int i;
     for (i = 0; i < counts_limit; i++)
@@ -342,7 +342,7 @@ static void _apply_to_counts_64(struct hdr_histogram* h, const int64_t* counts_d
     }
 }
 
-static int _apply_to_counts_zz(struct hdr_histogram* h, const uint8_t* counts_data, const int32_t data_limit)
+static int _apply_to_counts_zz(hdr_histogram_t* h, const uint8_t* counts_data, const int32_t data_limit)
 {
     int64_t data_index = 0;
     int32_t counts_index = 0;
@@ -383,7 +383,7 @@ static int _apply_to_counts_zz(struct hdr_histogram* h, const uint8_t* counts_da
 }
 
 static int _apply_to_counts(
-    struct hdr_histogram* h, const int32_t word_size, const uint8_t* counts_data, const int32_t counts_limit)
+    hdr_histogram_t* h, const int32_t word_size, const uint8_t* counts_data, const int32_t counts_limit)
 {
     switch (word_size)
     {
@@ -410,9 +410,9 @@ static int _apply_to_counts(
 static int hdr_decode_compressed_v0(
     _compression_flyweight* compression_flyweight,
     size_t length,
-    struct hdr_histogram** histogram)
+    hdr_histogram_t** histogram)
 {
-    struct hdr_histogram* h = NULL;
+    hdr_histogram_t* h = NULL;
     int result = 0;
     uint8_t* counts_array = NULL;
     _encoding_flyweight_v0 encoding_flyweight;
@@ -507,9 +507,9 @@ cleanup:
 static int hdr_decode_compressed_v1(
     _compression_flyweight* compression_flyweight,
     size_t length,
-    struct hdr_histogram** histogram)
+    hdr_histogram_t** histogram)
 {
-    struct hdr_histogram* h = NULL;
+    hdr_histogram_t* h = NULL;
     int result = 0;
     uint8_t* counts_array = NULL;
     _encoding_flyweight_v1 encoding_flyweight;
@@ -607,9 +607,9 @@ cleanup:
 static int hdr_decode_compressed_v2(
     _compression_flyweight* compression_flyweight,
     size_t length,
-    struct hdr_histogram** histogram)
+    hdr_histogram_t** histogram)
 {
-    struct hdr_histogram* h = NULL;
+    hdr_histogram_t* h = NULL;
     int result = 0;
     int rc = 0;
     uint8_t* counts_array = NULL;
@@ -706,7 +706,7 @@ cleanup:
 }
 
 int hdr_decode_compressed(
-    uint8_t* buffer, size_t length, struct hdr_histogram** histogram)
+    uint8_t* buffer, size_t length, hdr_histogram_t** histogram)
 {
     int32_t compression_cookie;
     _compression_flyweight* compression_flyweight;
@@ -743,7 +743,7 @@ int hdr_decode_compressed(
 /* ##  ##  ## ##    ##   ##     ##    ##       ##    ##  */
 /*  ###  ###  ##     ## ####    ##    ######## ##     ## */
 
-int hdr_log_writer_init(struct hdr_log_writer* writer)
+int hdr_log_writer_init(hdr_log_writer_t* writer)
 {
     (void)writer;
     return 0;
@@ -801,7 +801,7 @@ static int print_header(FILE* f)
 /* #[StartTime: 1403476110.183 (seconds since epoch), Mon Jun 23 10:28:30 NZST 2014] */
 /* "StartTimestamp","EndTimestamp","Interval_Max","Interval_Compressed_Histogram"    */
 int hdr_log_write_header(
-    struct hdr_log_writer* writer, FILE* file,
+    hdr_log_writer_t* writer, FILE* file,
     const char* user_prefix, hdr_timespec_t* timestamp)
 {
     (void)writer;
@@ -827,11 +827,11 @@ int hdr_log_write_header(
 }
 
 int hdr_log_write(
-    struct hdr_log_writer* writer,
+    hdr_log_writer_t* writer,
     FILE* file,
     const hdr_timespec_t* start_timestamp,
     const hdr_timespec_t* end_timestamp,
-    struct hdr_histogram* histogram)
+    hdr_histogram_t* histogram)
 {
     uint8_t* compressed_histogram = NULL;
     size_t compressed_len = 0;
@@ -883,7 +883,7 @@ cleanup:
 /* ##    ##  ##       ##     ## ##     ## ##       ##    ##  */
 /* ##     ## ######## ##     ## ########  ######## ##     ## */
 
-int hdr_log_reader_init(struct hdr_log_reader* reader)
+int hdr_log_reader_init(hdr_log_reader_t* reader)
 {
     reader->major_version = 0;
     reader->minor_version = 0;
@@ -893,13 +893,13 @@ int hdr_log_reader_init(struct hdr_log_reader* reader)
     return 0;
 }
 
-static void scan_log_format(struct hdr_log_reader* reader, const char* line)
+static void scan_log_format(hdr_log_reader_t* reader, const char* line)
 {
     const char* format = "#[Histogram log format version %d.%d]";
     sscanf(line, format, &reader->major_version, &reader->minor_version);
 }
 
-static void scan_start_time(struct hdr_log_reader* reader, const char* line)
+static void scan_start_time(hdr_log_reader_t* reader, const char* line)
 {
     const char* format = "#[StartTime: %lf [^\n]";
     double timestamp = 0.0;
@@ -910,13 +910,13 @@ static void scan_start_time(struct hdr_log_reader* reader, const char* line)
     }
 }
 
-static void scan_header_line(struct hdr_log_reader* reader, const char* line)
+static void scan_header_line(hdr_log_reader_t* reader, const char* line)
 {
     scan_log_format(reader, line);
     scan_start_time(reader, line);
 }
 
-static bool validate_log_version(struct hdr_log_reader* reader)
+static bool validate_log_version(hdr_log_reader_t* reader)
 {
     return reader->major_version == LOG_MAJOR_VERSION &&
         (reader->minor_version == 0 || reader->minor_version == 1 ||
@@ -925,7 +925,7 @@ static bool validate_log_version(struct hdr_log_reader* reader)
 
 #define HEADER_LINE_LENGTH 128
 
-int hdr_log_read_header(struct hdr_log_reader* reader, FILE* file)
+int hdr_log_read_header(hdr_log_reader_t* reader, FILE* file)
 {
     char line[HEADER_LINE_LENGTH]; /* TODO: check for overflow. */
 
@@ -1054,7 +1054,7 @@ static ssize_t hdr_getline(char** lineptr, FILE* stream)
 #endif
 
 int hdr_log_read(
-    struct hdr_log_reader* reader, FILE* file, struct hdr_histogram** histogram,
+    hdr_log_reader_t* reader, FILE* file, hdr_histogram_t** histogram,
     hdr_timespec_t* timestamp, hdr_timespec_t* interval)
 {
     const char* format_v12 = "%lf,%lf,%d.%d,%s";
@@ -1150,7 +1150,7 @@ cleanup:
     return result;
 }
 
-int hdr_log_encode(struct hdr_histogram* histogram, char** encoded_histogram)
+int hdr_log_encode(hdr_histogram_t* histogram, char** encoded_histogram)
 {
     char *encoded_histogram_tmp = NULL;
     uint8_t* compressed_histogram = NULL;
@@ -1183,7 +1183,7 @@ cleanup:
     return result;
 }
 
-int hdr_log_decode(struct hdr_histogram** histogram, char* base64_histogram, size_t base64_len)
+int hdr_log_decode(hdr_histogram_t** histogram, char* base64_histogram, size_t base64_len)
 {
     int r;
     uint8_t* compressed_histogram = NULL;

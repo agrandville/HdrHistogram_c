@@ -67,7 +67,7 @@ int hdr_log_writer_init(hdr_log_writer_t* writer);
  * was a failure.  EIO if the write failed.
  */
 int hdr_log_write_header(
-    struct hdr_log_writer* writer,
+    hdr_log_writer_t* writer,
     FILE* file,
     const char* user_prefix,
     hdr_timespec_t* timestamp);
@@ -94,11 +94,11 @@ int hdr_log_write_header(
  * write failed.
  */
 int hdr_log_write(
-    struct hdr_log_writer* writer,
+    hdr_log_writer_t* writer,
     FILE* file,
     const hdr_timespec_t* start_timestamp,
     const hdr_timespec_t* end_timestamp,
-    struct hdr_histogram* histogram);
+    hdr_histogram_t* histogram);
 
 typedef struct hdr_log_reader
 {

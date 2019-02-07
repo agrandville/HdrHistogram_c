@@ -23,8 +23,8 @@ int main(int argc, char** argv)
 {
     int rc = 0;
     FILE* f;
-    struct hdr_log_reader reader;
-    struct hdr_histogram* h = NULL;
+    hdr_log_reader_t reader;
+    hdr_histogram_t* h = NULL;
     hdr_timespec_t timestamp, interval;
 
     if (argc == 1)

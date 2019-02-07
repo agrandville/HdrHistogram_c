@@ -9,10 +9,10 @@
 
 struct hdr_mutex* hdr_mutex_alloc(void)
 {
-    return malloc(sizeof(hdr_mutex));
+    return malloc(sizeof(hdr_mutex_t));
 }
 
-void hdr_mutex_free(struct hdr_mutex* mutex)
+void hdr_mutex_free( hdr_mutex_t* mutex)
 {
     free(mutex);
 }
