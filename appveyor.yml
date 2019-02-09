@@ -25,6 +25,10 @@ install:
 
 build:
 
+init:
+  - cmake --version
+  - msbuild /version
+  
 build_script:
   - cd c:\dev\zlib-1.2.11
   - md build%MSVC_PLATFORM%
