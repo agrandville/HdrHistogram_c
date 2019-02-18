@@ -30,7 +30,7 @@ static char* test_store_load_64()
 
 static char* test_store_load_pointer()
 {
-    int64_t r = 12;
+	int64_t r = INT64_MAX;
     int64_t* q = 0;
     int64_t* s;
 
@@ -47,20 +47,22 @@ static char* test_exchange()
 {
     int64_t val1 = 123124;
     int64_t val2 = 987234;
+	int64_t val3 = 0;
 
     int64_t p = val1;
     int64_t q = val2;
     
-    hdr_atomic_exchange_64(&p, q);
+	val3 = hdr_atomic_exchange_64(&p, q);
     mu_assert("Failed hdr_atomic_exchange_64", compare_int64(p, val2));
+	mu_assert("Failed hdr_atomic_exchange_64", compare_int64(val3, val1));
 
     return 0;
 }
 
 static char* test_add()
 {
-    int64_t val1 = 123124;
-    int64_t val2 = 987234;
+    int64_t val1 = INT64_MAX-1;
+    int64_t val2 = 1;
     int64_t expected = val1 + val2;
 
     int64_t result = hdr_atomic_add_fetch_64(&val1, val2);

@@ -11,53 +11,96 @@
 #if defined(_MSC_VER)
 
 #include <stdint.h>
+#include <windows.h>
+#include <winnt.h>
 #include <intrin.h>
 
 static void __inline * hdr_atomic_load_pointer(void** pointer)
 {
-	_ReadBarrier();
-	return *pointer;
+#ifdef _M_IX86
+	__asm {
+		mov eax, dword ptr[pointer]
+		mov ecx, dword ptr[eax]
+		lock cmpxchg8b qword ptr[ecx];
+ 		mov dword ptr pointer, ecx;
+ 		mov eax, dword ptr[pointer]
 }
-
-static void hdr_atomic_store_pointer(void** pointer, void* value)
+#else
+	return *pointer; 
+#endif
+}
+// Intel 64 and IA-32 Architectures Software Developer's Manual, Volume 3A, 8.1.1. Guaranteed Atomic Operations:
+static __inline void hdr_atomic_store_pointer(volatile void** pointer, volatile void* value)
 {
-	_WriteBarrier();
 	*pointer = value;
 }
 
 static int64_t __inline hdr_atomic_load_64(int64_t* field)
 { 
-	_ReadBarrier();
+#ifdef _M_IX86
+	__asm {
+		mov edi, dword ptr[field]
+		xor eax, eax
+		xor ebx, ebx
+		xor ecx, ecx
+		xor edx, edx
+		lock cmpxchg8b qword ptr[edi]
+	}
+#else
 	return *field;
+#endif
 }
 
 static void __inline hdr_atomic_store_64(int64_t* field, int64_t value)
 {
-	_WriteBarrier();
-	*field = value;
+#ifdef _M_IX86
+	__asm {
+		mov edi, field
+		mov eax, dword ptr[edi]
+		mov edx, dword ptr[edi + 4]
+		mov ebx, dword ptr[value]
+		mov ecx, dword ptr[value + 4]
+		lock cmpxchg8b qword ptr[edi]
+	}
+#else
+	_InterlockedExchange64(field, value);
+#endif
 }
 
 static int64_t __inline hdr_atomic_exchange_64(volatile int64_t* field, int64_t initial)
 {
-#ifdef _M_X64
-	return _InterlockedExchange64(field, initial);
+#ifdef _M_IX86
+	__asm {
+		mov edi, field
+		mov eax, dword ptr[edi]
+		mov edx, dword ptr[edi + 4]
+		mov ebx, dword ptr[initial]
+		mov ecx, dword ptr[initial + 4]
+		lock cmpxchg8b qword ptr[edi]
+	}
 #else
-	_WriteBarrier();
-	int64_t val = *field;
-	*field = initial;
-	return val;
+	return _InterlockedExchange64(field, initial);
 #endif
 }
 
 static int64_t __inline hdr_atomic_add_fetch_64(volatile int64_t* field, int64_t value)
 {
-#ifdef _M_X64
-	return _InterlockedExchangeAdd64(field, value) + value;
+#ifdef _M_IX86
+	return InterlockedExchangeAdd64(field, value);
+// 	_WriteBarrier();
+// 	int64_t val = *field + value;
+// 	*field = val;
+// 	return val;
+	__asm {
+		mov edi, field
+		lea ebx, value
+//		mov rax, value
+		lock xadd dword ptr[edi], eax
+		xor edx, edx
+	}
 #else
-	_WriteBarrier();
-	int64_t val = *field+value;
-	*field = val;
-	return val;
+#pragma intrinsic(_InterlockedExchangeAdd64)
+	return _InterlockedExchangeAdd64(field, value) + value;
 #endif
 }
 
@@ -81,7 +124,7 @@ static inline void* hdr_atomic_load_pointer(void** pointer)
 	return p;
 }
 
-static inline void hdr_atomic_store_pointer(void** pointer, void* value)
+static inline void hdr_atomic_store_pointer(volatile void** pointer, volatile void* value)
 {
     asm volatile ("lock; xchgq %0, %1" : "+q" (value), "+m" (*pointer));
 }
