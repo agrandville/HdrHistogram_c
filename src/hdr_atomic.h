@@ -13,7 +13,7 @@
 #ifdef _M_X64
 #pragma intrinsic(_InterlockedExchange64,_InterlockedExchangeAdd64)
 #else
-#pragma intrinsic(InterlockedExchangeAdd64)
+#pragma intrinsic(_InterlockedExchangeAdd64)
 #endif
 
 #include <stdint.h>
@@ -21,7 +21,7 @@
 #include <winnt.h>
 #include <intrin.h>
 
-static void __inline * hdr_atomic_load_pointer(void** pointer)
+static void __inline * hdr_atomic_load_pointer(volatile void** pointer)
 {
 #ifdef _M_IX86
 	__asm {
@@ -41,7 +41,7 @@ static __inline void hdr_atomic_store_pointer(volatile void** pointer, volatile 
 	*pointer = value;
 }
 
-static int64_t __inline hdr_atomic_load_64(int64_t* field)
+static int64_t __inline hdr_atomic_load_64(volatile int64_t* field)
 { 
 #ifdef _M_IX86
 	__asm {
@@ -57,7 +57,7 @@ static int64_t __inline hdr_atomic_load_64(int64_t* field)
 #endif
 }
 
-static void __inline hdr_atomic_store_64(int64_t* field, int64_t value)
+static void __inline hdr_atomic_store_64(volatile int64_t* field, int64_t value)
 {
 #ifdef _M_IX86
 	__asm {
