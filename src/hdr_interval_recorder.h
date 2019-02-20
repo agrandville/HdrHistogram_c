@@ -13,8 +13,8 @@
 HDR_ALIGN_PREFIX(8)
 typedef struct hdr_interval_recorder
 {
-    hdr_histogram_t* active;
-    hdr_histogram_t* inactive;
+    struct hdr_histogram* active;
+    struct hdr_histogram* inactive;
     hdr_writer_reader_phaser_t phaser;
 } hdr_interval_recorder_t;
 HDR_ALIGN_SUFFIX(8);
@@ -57,11 +57,11 @@ int64_t hdr_interval_recorder_record_corrected_values(
     int64_t expected_interval
 );
 
-hdr_histogram_t* hdr_interval_recorder_sample_and_recycle(
+struct hdr_histogram* hdr_interval_recorder_sample_and_recycle(
     hdr_interval_recorder_t* r,
-    hdr_histogram_t* inactive_histogram);
+    struct hdr_histogram* inactive_histogram);
 
-hdr_histogram_t* hdr_interval_recorder_sample(hdr_interval_recorder_t* r);
+struct hdr_histogram* hdr_interval_recorder_sample(hdr_interval_recorder_t* r);
 
 #ifdef __cplusplus
 }

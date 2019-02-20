@@ -35,12 +35,12 @@ extern "C" {
 /**
  * Encode and compress the histogram with gzip.
  */
-int hdr_log_encode(hdr_histogram_t* histogram, char** encoded_histogram);
+int hdr_log_encode(struct hdr_histogram* histogram, char** encoded_histogram);
 
 /**
  * Decode and decompress the histogram with gzip.
  */
-int hdr_log_decode(hdr_histogram_t** histogram, char* base64_histogram, size_t base64_len);
+int hdr_log_decode(struct hdr_histogram** histogram, char* base64_histogram, size_t base64_len);
 
 typedef struct hdr_log_writer
 {
@@ -98,7 +98,7 @@ int hdr_log_write(
     FILE* file,
     const hdr_timespec_t* start_timestamp,
     const hdr_timespec_t* end_timestamp,
-    hdr_histogram_t* histogram);
+    struct hdr_histogram* histogram);
 
 typedef struct hdr_log_reader
 {
@@ -148,7 +148,7 @@ int hdr_log_read_header(hdr_log_reader_t* reader, FILE* file);
  * the read.  EINVAL in any input values are incorrect.
  */
 int hdr_log_read(
-    hdr_log_reader_t* reader, FILE* file, hdr_histogram_t** histogram,
+    hdr_log_reader_t* reader, FILE* file, struct hdr_histogram** histogram,
     hdr_timespec_t* timestamp, hdr_timespec_t* interval);
 
 /**
