@@ -10,6 +10,12 @@
 
 #if defined(_MSC_VER)
 
+#ifdef _M_X64
+#pragma intrinsic(_InterlockedExchange64,_InterlockedExchangeAdd64)
+#else
+#pragma intrinsic(InterlockedExchangeAdd64)
+#endif
+
 #include <stdint.h>
 #include <windows.h>
 #include <winnt.h>
@@ -86,20 +92,8 @@ static int64_t __inline hdr_atomic_exchange_64(volatile int64_t* field, int64_t 
 static int64_t __inline hdr_atomic_add_fetch_64(volatile int64_t* field, int64_t value)
 {
 #ifdef _M_IX86
-	return InterlockedExchangeAdd64(field, value);
-// 	_WriteBarrier();
-// 	int64_t val = *field + value;
-// 	*field = val;
-// 	return val;
-	__asm {
-		mov edi, field
-		lea ebx, value
-//		mov rax, value
-		lock xadd dword ptr[edi], eax
-		xor edx, edx
-	}
+	return InterlockedExchangeAdd64(field, value) + value;
 #else
-#pragma intrinsic(_InterlockedExchangeAdd64)
 	return _InterlockedExchangeAdd64(field, value) + value;
 #endif
 }
