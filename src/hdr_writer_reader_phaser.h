@@ -28,21 +28,21 @@ HDR_ALIGN_SUFFIX(8);
 extern "C" {
 #endif
 
-    int hdr_writer_reader_phaser_init(hdr_writer_reader_phaser_t* p);
+    int hdr_writer_reader_phaser_init(struct hdr_writer_reader_phaser* p);
 
-    void hdr_writer_reader_phaser_destroy(hdr_writer_reader_phaser_t* p);
+    void hdr_writer_reader_phaser_destroy(struct hdr_writer_reader_phaser* p);
 
-    int64_t hdr_phaser_writer_enter(hdr_writer_reader_phaser_t* p);
+    int64_t hdr_phaser_writer_enter(struct hdr_writer_reader_phaser* p);
 
     void hdr_phaser_writer_exit(
-    hdr_writer_reader_phaser_t* p, int64_t critical_value_at_enter);
+    struct hdr_writer_reader_phaser* p, int64_t critical_value_at_enter);
 
-    void hdr_phaser_reader_lock(hdr_writer_reader_phaser_t* p);
+    void hdr_phaser_reader_lock(struct hdr_writer_reader_phaser* p);
 
-    void hdr_phaser_reader_unlock(hdr_writer_reader_phaser_t* p);
+    void hdr_phaser_reader_unlock(struct hdr_writer_reader_phaser* p);
 
     void hdr_phaser_flip_phase(
-    hdr_writer_reader_phaser_t* p, int64_t sleep_time_ns);
+    struct hdr_writer_reader_phaser* p, int64_t sleep_time_ns);
 
 #ifdef __cplusplus
 }

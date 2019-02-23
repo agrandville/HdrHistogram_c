@@ -12,8 +12,6 @@
 
 #ifdef _M_X64
 #pragma intrinsic(_InterlockedExchange64,_InterlockedExchangeAdd64)
-#else
-#pragma intrinsic(_InterlockedExchangeAdd64)
 #endif
 
 #include <stdint.h>
@@ -21,7 +19,7 @@
 #include <winnt.h>
 #include <intrin.h>
 
-static void __inline * hdr_atomic_load_pointer(volatile void** pointer)
+inline static void* hdr_atomic_load_pointer(void** pointer)
 {
 #ifdef _M_IX86
 	__asm {
@@ -36,7 +34,7 @@ static void __inline * hdr_atomic_load_pointer(volatile void** pointer)
 #endif
 }
 // Intel 64 and IA-32 Architectures Software Developer's Manual, Volume 3A, 8.1.1. Guaranteed Atomic Operations:
-static __inline void hdr_atomic_store_pointer(volatile void** pointer, volatile void* value)
+inline static void hdr_atomic_store_pointer(void** pointer,  void* value)
 {
 	*pointer = value;
 }
@@ -57,7 +55,7 @@ static int64_t __inline hdr_atomic_load_64(volatile int64_t* field)
 #endif
 }
 
-static void __inline hdr_atomic_store_64(volatile int64_t* field, int64_t value)
+inline static void hdr_atomic_store_64(int64_t* field, int64_t value)
 {
 #ifdef _M_IX86
 	__asm {
@@ -73,7 +71,7 @@ static void __inline hdr_atomic_store_64(volatile int64_t* field, int64_t value)
 #endif
 }
 
-static int64_t __inline hdr_atomic_exchange_64(volatile int64_t* field, int64_t initial)
+inline static int64_t hdr_atomic_exchange_64(volatile int64_t* field, int64_t initial)
 {
 #ifdef _M_IX86
 	__asm {

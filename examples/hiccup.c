@@ -50,7 +50,7 @@ static void* record_hiccups(void* thread_context)
 
         hdr_timespec_t t0;
         hdr_timespec_t t1;
-        hdr_interval_recorder_t* r;
+        struct hdr_interval_recorder* r;
 
 #ifdef _WINDOWS_
 	HANDLE hTimer = NULL;
@@ -163,7 +163,7 @@ int main(int argc, char** argv)
     hdr_timespec_t timestamp;
     hdr_timespec_t start_timestamp;
     hdr_timespec_t end_timestamp;
-    hdr_interval_recorder_t recorder;
+    struct hdr_interval_recorder recorder;
     hdr_log_writer_t log_writer;
     config_t config;
     hdr_histogram_t* inactive = NULL;
